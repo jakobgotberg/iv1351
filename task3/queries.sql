@@ -23,11 +23,12 @@ WHERE EXTRACT(YEAR FROM starting_time) = '2022';
 
 -- 3) 
     -- List all instructors who has given more than a specific number of lessons during the current month
-SELECT inst_uname, COUNT(*) 
+SELECT inst_uname AS instructor, COUNT(*) AS Lessons
 FROM event
 WHERE (EXTRACT(YEAR FROM starting_time) = '2022' AND 
 EXTRACT(MONTH FROM starting_time) = EXTRACT(MONTH FROM CURRENT_DATE))
-GROUP BY inst_uname HAVING COUNT(*) > 1;
+GROUP BY inst_uname HAVING COUNT(*) > 1
+ORDER BY Lessons DESC;
 
 -- 4)
     -- List all ensembles held during the next week, sorted by music genre and weekday
