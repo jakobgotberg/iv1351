@@ -3,10 +3,10 @@
 
 -- 1)
     -- Total Amount of Lessons
-SELECT COUNT(*) AS Lessons_per_month 
+SELECT EXTRACT(MONTH FROM starting_time) AS Month, COUNT(*) AS Lessons
 FROM event
 WHERE EXTRACT(YEAR FROM starting_time) = '2022' 
-GROUP BY EXTRACT(MONTH FROM starting_time);
+GROUP BY Month;
 
     -- Specified by Lesson Type
 SELECT EXTRACT(MONTH FROM starting_time) AS Month, event_type AS Lesson_type, 
