@@ -1,19 +1,23 @@
 package se.kth.iv1351.jdbcintro;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
 /**
- * A small program that illustrates how to write a simple JDBC program.
+ * A subset of the functionality of the database. This program only covers the renting of instrument, not the entire database.
  */
 public class BasicJdbc {
 
+    /**
+     * This function returns a connection to the PostgreSQL database. 
+     * @return Connection connection
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
     public Connection createConnection() throws SQLException, ClassNotFoundException {
         Class.forName("org.postgresql.Driver");
 
@@ -22,6 +26,12 @@ public class BasicJdbc {
         return connection;
     }
 
+    /**
+     * This function is the execution loop where the "meat" if the program is run.
+     * @param connection
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
     public void accessDatabase(Connection connection) throws SQLException, ClassNotFoundException {
         Statement statement = connection.createStatement();
         Scanner input = new Scanner(System.in);
@@ -196,9 +206,5 @@ public class BasicJdbc {
             System.out.println();
             e.printStackTrace();
         }
-        
-
-        
-
   }
 }
