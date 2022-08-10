@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+
 /**
  * A subset of the functionality of the database. This program only covers the renting of instrument, not the entire database.
  */
@@ -23,6 +24,7 @@ public class BasicJdbc {
 
         Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/soundgood_musicschool",
       "postgres", "postgres");
+        connection.setAutoCommit(false);
         return connection;
     }
 
@@ -45,12 +47,12 @@ public class BasicJdbc {
             else if(userInput.equalsIgnoreCase("RENT"))
             {
                 System.out.println("Please enter the username for the student.");
-                rentInstrument(statement, input.next(), input);
+                rentInstrument(statement, input.next(), input, connection);
             }
             else if(userInput.equalsIgnoreCase("TERMINATE"))
             {
                 System.out.println("Please enter the username for the student.");
-                terminateRental(statement, input.next(), input);
+                terminateRental(statement, input.next(), input, connection);
             }
             else if(userInput.equalsIgnoreCase("LIST"))
             {
@@ -79,9 +81,17 @@ public class BasicJdbc {
         return result.getInt(1);
     }
 
-    private void renting(Statement statement, String instrumentID, String student, String rent_start, String rent_end) throws SQLException{
+    private void renting(Statement statement, String instrumentID, String student, String rent_start, String rent_end, Connection connection) throws SQLException{
         statement.executeUpdate("INSERT INTO instrument_rented(stud_uname, instrument_id, rent_start, rent_end)  VALUES('" + student + "', " + instrumentID + ", '" + rent_start + "', '" + rent_end + "')");
         statement.executeUpdate("UPDATE instrument SET is_booked = TRUE WHERE instrument_id = '" + instrumentID + "'");
+        try
+        {
+            connection.commit();
+        }
+        catch(SQLException e)
+        {
+            connection.rollback();
+        }
     }
 
     private boolean isBooked(Statement statement, String instrumentID) throws SQLException{
@@ -90,7 +100,7 @@ public class BasicJdbc {
         return result.getBoolean(1);
     }
 
-    private void rentInstrument(Statement statement, String student, Scanner input) {
+    private void rentInstrument(Statement statement, String student, Scanner input, Connection connection) {
         try
         {
             if (!studentExist(statement, student))
@@ -120,7 +130,7 @@ public class BasicJdbc {
             String rent_start = input.next();
             System.out.println("Please specify the starting date of the rental.");
             String rent_end = input.next();
-            renting(statement, instrumentID, student, rent_start, rent_end);
+            renting(statement, instrumentID, student, rent_start, rent_end, connection);
         }
         catch(SQLException e)
         {
@@ -130,7 +140,7 @@ public class BasicJdbc {
         System.out.println("Instrument successfully rented.\n");
     }
 
-    private void terminateRental(Statement statement, String student, Scanner input) throws SQLException{
+    private void terminateRental(Statement statement, String student, Scanner input, Connection connection) throws SQLException{
         String terminationDate;
         String instrumentID;
         ResultSet result;
@@ -167,10 +177,18 @@ public class BasicJdbc {
         terminationDate = input.next();
         statement.executeUpdate("UPDATE instrument_rented SET termination_date = '" + terminationDate + "' WHERE instrument_id = '" + instrumentID + "' AND stud_uname = '" + student + "'");
         statement.executeUpdate("UPDATE instrument SET is_booked = FALSE WHERE instrument_id = '" + instrumentID + "'");
+
+        try
+        {
+            connection.commit();
+        }
+        catch(SQLException e)
+        {
+            connection.rollback();
+        }
         System.out.println("Rental Terminated.\n");
     }
 
-    // Add COUNT(*) instead of the boolean.
     private boolean listTable(Statement statement, String instrument_type) throws SQLException {
         String query = "SELECT COUNT(*) FROM instrument WHERE is_booked = FALSE AND instrument_type = '";
         ResultSet result = statement.executeQuery(query + instrument_type + "'");
